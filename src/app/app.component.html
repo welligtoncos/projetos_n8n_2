@@ -1,0 +1,14 @@
+<!-- Navbar e Footer só aparecem se NÃO estiver na rota de login -->
+<app-navbar 
+  *ngIf="!isLoginPage()"
+  [title]="'Solutions Santos - Sistema Corporativo'" 
+  [usuario]="'Yasmin Santos'">
+</app-navbar>
+
+<main [style.min-height]="isLoginPage() ? '100dvh' : 'calc(100dvh - 64px - 56px)'">
+  <div [style.max-width]="isLoginPage() ? '100%' : '1200px'" style="margin: 0 auto; padding: 1px;">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+<app-footer *ngIf="!isLoginPage()" [empresa]="'Solutions Santos'"></app-footer>

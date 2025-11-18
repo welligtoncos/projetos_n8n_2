@@ -1,0 +1,206 @@
+<section class="grid">
+  <!-- KPIs -->
+  <mat-card class="kpi">
+    <div class="kpi-title">IP Público</div>
+    <div class="kpi-value">{{ summary().publicIp }}</div>
+    <div class="kpi-sub">Região: {{ summary().region }}</div>
+  </mat-card>
+
+  <mat-card class="kpi">
+    <div class="kpi-title">Serviços (ativos/total)</div>
+    <div class="kpi-value">{{ summary().servicesRunning }} / {{ summary().servicesTotal }}</div>
+    <mat-progress-bar mode="determinate" [value]="servicesRunningPct()"></mat-progress-bar>
+  </mat-card>
+
+  <mat-card class="kpi">
+    <div class="kpi-title">CPU média</div>
+    <div class="kpi-value">{{ summary().cpuAvg }}%</div>
+    <mat-progress-bar mode="determinate" [value]="summary().cpuAvg"></mat-progress-bar>
+  </mat-card>
+
+  <mat-card class="kpi">
+    <div class="kpi-title">Memória média</div>
+    <div class="kpi-value">{{ summary().memAvg }}%</div>
+    <mat-progress-bar mode="determinate" [value]="summary().memAvg"></mat-progress-bar>
+  </mat-card>
+
+  <mat-card class="kpi">
+    <div class="kpi-title">Disco médio</div>
+    <div class="kpi-value">{{ summary().diskAvg }}%</div>
+    <mat-progress-bar mode="determinate" [value]="summary().diskAvg"></mat-progress-bar>
+  </mat-card>
+
+  <mat-card class="kpi">
+    <div class="kpi-title">RDS connections</div>
+    <div class="kpi-value">{{ summary().rdsConnections }}</div>
+  </mat-card>
+
+  <mat-card class="kpi">
+    <div class="kpi-title">Agentes online</div>
+    <div class="kpi-value">{{ summary().agentsOnline }}</div>
+  </mat-card>
+
+  <mat-card class="kpi">
+    <div class="kpi-title">Atend. paralelos</div>
+    <div class="kpi-value">{{ summary().parallelTickets }}</div>
+  </mat-card>
+
+  <!-- Serviços -->
+  <mat-card class="panel">
+    <div class="panel-head">
+      <h3>Serviços</h3>
+      <span class="subtitle">Atualizado: {{ summary().updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+    <table mat-table [dataSource]="services()" class="mat-elevation-z1">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Serviço</th>
+        <td mat-cell *matCellDef="let s">
+          <div class="service-name">
+            <mat-icon *ngIf="s.type==='EC2'">dns</mat-icon>
+            <mat-icon *ngIf="s.type==='ECS'">view_module</mat-icon>
+            <mat-icon *ngIf="s.type==='EKS'">widgets</mat-icon>
+            <mat-icon *ngIf="s.type==='LAMBDA'">bolt</mat-icon>
+            {{ s.name }}
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let s">{{ s.type }}</td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let s">
+          <span class="pill" [class.ok]="s.status==='RUNNING'"
+                            [class.warn]="s.status==='DEGRADED'"
+                            [class.stop]="s.status==='STOPPED'">
+            {{ s.status }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="cpu">
+        <th mat-header-cell *matHeaderCellDef>CPU</th>
+        <td mat-cell *matCellDef="let s">
+          {{ s.cpu }}%
+          <mat-progress-bar mode="determinate" [value]="s.cpu"></mat-progress-bar>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="mem">
+        <th mat-header-cell *matHeaderCellDef>Mem</th>
+        <td mat-cell *matCellDef="let s">
+          {{ s.mem }}%
+          <mat-progress-bar mode="determinate" [value]="s.mem"></mat-progress-bar>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="uptime">
+        <th mat-header-cell *matHeaderCellDef>Uptime</th>
+        <td mat-cell *matCellDef="let s">{{ s.uptimeMinutes }} min</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedServiceCols"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedServiceCols;"></tr>
+    </table>
+  </mat-card>
+
+  <!-- Bancos de dados -->
+  <mat-card class="panel">
+    <div class="panel-head"><h3>Bancos de dados (RDS)</h3></div>
+    <table mat-table [dataSource]="databases()" class="mat-elevation-z1">
+      <ng-container matColumnDef="engine">
+        <th mat-header-cell *matHeaderCellDef>Engine</th>
+        <td mat-cell *matCellDef="let d">{{ d.engine }}</td>
+      </ng-container>
+      <ng-container matColumnDef="version">
+        <th mat-header-cell *matHeaderCellDef>Versão</th>
+        <td mat-cell *matCellDef="let d">{{ d.version }}</td>
+      </ng-container>
+      <ng-container matColumnDef="instanceClass">
+        <th mat-header-cell *matHeaderCellDef>Classe</th>
+        <td mat-cell *matCellDef="let d">{{ d.instanceClass }}</td>
+      </ng-container>
+      <ng-container matColumnDef="storageGb">
+        <th mat-header-cell *matHeaderCellDef>Storage</th>
+        <td mat-cell *matCellDef="let d">{{ d.storageGb }} GB</td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let d">{{ d.status }}</td>
+      </ng-container>
+      <ng-container matColumnDef="endpoint">
+        <th mat-header-cell *matHeaderCellDef>Endpoint</th>
+        <td mat-cell *matCellDef="let d"><code>{{ d.endpoint }}</code></td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedDbCols"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedDbCols;"></tr>
+    </table>
+  </mat-card>
+
+  <!-- Agentes de atendimento -->
+  <mat-card class="panel">
+    <div class="panel-head"><h3>Agentes de atendimento</h3></div>
+    <table mat-table [dataSource]="agents()" class="mat-elevation-z1">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Agente</th>
+        <td mat-cell *matCellDef="let a">{{ a.name }}</td>
+      </ng-container>
+      <ng-container matColumnDef="online">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let a">
+          <span class="pill" [class.ok]="a.online" [class.stop]="!a.online">
+            {{ a.online ? 'Online' : 'Offline' }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="currentTickets">
+        <th mat-header-cell *matHeaderCellDef>Atend. atuais</th>
+        <td mat-cell *matCellDef="let a">{{ a.currentTickets }}</td>
+      </ng-container>
+      <ng-container matColumnDef="aht">
+        <th mat-header-cell *matHeaderCellDef>AHT (min)</th>
+        <td mat-cell *matCellDef="let a">{{ a.avgHandleTimeMin | number:'1.1-1' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedAgentCols"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedAgentCols;"></tr>
+    </table>
+  </mat-card>
+
+  <!-- Rede -->
+  <mat-card class="panel">
+    <div class="panel-head"><h3>Rede (ENIs)</h3></div>
+    <table mat-table [dataSource]="network()" class="mat-elevation-z1">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let n">{{ n.id }}</td>
+      </ng-container>
+      <ng-container matColumnDef="privateIp">
+        <th mat-header-cell *matHeaderCellDef>Private IP</th>
+        <td mat-cell *matCellDef="let n">{{ n.privateIp }}</td>
+      </ng-container>
+      <ng-container matColumnDef="publicIp">
+        <th mat-header-cell *matHeaderCellDef>Public IP</th>
+        <td mat-cell *matCellDef="let n">{{ n.publicIp || '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="vpcId">
+        <th mat-header-cell *matHeaderCellDef>VPC</th>
+        <td mat-cell *matCellDef="let n">{{ n.vpcId }}</td>
+      </ng-container>
+      <ng-container matColumnDef="subnetId">
+        <th mat-header-cell *matHeaderCellDef>Subnet</th>
+        <td mat-cell *matCellDef="let n">{{ n.subnetId }}</td>
+      </ng-container>
+      <ng-container matColumnDef="sgs">
+        <th mat-header-cell *matHeaderCellDef>Security Groups</th>
+        <td mat-cell *matCellDef="let n">
+          <mat-chip-set>
+            <mat-chip *ngFor="let sg of n.securityGroups">{{ sg }}</mat-chip>
+          </mat-chip-set>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedNetCols"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedNetCols;"></tr>
+    </table>
+  </mat-card>
+</section>

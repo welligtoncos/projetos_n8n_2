@@ -1,0 +1,137 @@
+<div class="login-container">
+      <!-- Canvas para partículas -->
+      <canvas #particleCanvas class="particle-canvas"></canvas>
+      
+      <!-- Gradientes animados de fundo -->
+      <div class="background-gradients">
+        <div class="gradient-orb gradient-orb-1"></div>
+        <div class="gradient-orb gradient-orb-2"></div>
+        <div class="gradient-orb gradient-orb-3"></div>
+      </div>
+
+      <!-- Conteúdo principal -->
+      <div class="content-wrapper">
+        <div class="login-card" [class.loading]="loading()">
+          
+          <!-- Header -->
+          <div class="header">
+            <div class="logo-container">
+              <mat-icon class="logo-icon">shield</mat-icon>
+            </div>
+            <h1 class="title">Portal Corporativo SS</h1>
+            <p class="subtitle">
+              <mat-icon>auto_awesome</mat-icon>
+              Bem-vindo de volta
+            </p>
+          </div>
+
+          <!-- Barra de progresso -->
+          <div class="progress-container" *ngIf="loading()">
+            <div class="progress-bar"></div>
+          </div>
+
+          <!-- Formulário -->
+          <form [formGroup]="form" (ngSubmit)="submit()" class="form-container">
+            
+            <!-- Campo Email -->
+            <div class="field-container" 
+                 [class.focused]="focusedField() === 'email'"
+                 [class.error]="emailError()">
+              <div class="field-wrapper">
+                <div class="field-glow"></div>
+                <div class="field-input">
+                  <mat-icon class="field-icon">mail</mat-icon>
+                  <input 
+                    type="email"
+                    formControlName="email"
+                    placeholder="entre com seu email"
+                    (focus)="focusedField.set('email')"
+                    (blur)="focusedField.set('')"
+                    autocomplete="email"
+                    class="input-field">
+                </div>
+                <div class="field-underline" *ngIf="focusedField() === 'email'"></div>
+              </div>
+              <div class="field-message error" *ngIf="emailError()">
+                {{ emailError() }}
+              </div>
+              <div class="field-message hint" *ngIf="!emailError() && focusedField() === 'email'">
+                Use seu e-mail corporativo
+              </div>
+            </div>
+
+            <!-- Campo Senha -->
+            <div class="field-container" 
+                 [class.focused]="focusedField() === 'password'"
+                 [class.error]="passwordError()">
+              <div class="field-wrapper">
+                <div class="field-glow"></div>
+                <div class="field-input">
+                  <mat-icon class="field-icon">lock</mat-icon>
+                  <input 
+                    [type]="hidePassword() ? 'password' : 'text'"
+                    formControlName="password"
+                    placeholder="Digite sua senha"
+                    (focus)="focusedField.set('password')"
+                    (blur)="focusedField.set('')"
+                    autocomplete="current-password"
+                    class="input-field">
+                  <button 
+                    type="button" 
+                    (click)="hidePassword.set(!hidePassword())"
+                    class="toggle-password">
+                    <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+                  </button>
+                </div>
+                <div class="field-underline" *ngIf="focusedField() === 'password'"></div>
+              </div>
+              <div class="field-message error" *ngIf="passwordError()">
+                {{ passwordError() }}
+              </div>
+            </div>
+
+            <!-- Opções -->
+            <div class="options-row">
+              <label class="checkbox-container">
+                <input 
+                  type="checkbox" 
+                  formControlName="remember"
+                  class="checkbox-input">
+                <div class="checkbox-custom">
+                  <div class="checkbox-check" *ngIf="form.value.remember"></div>
+                </div>
+                <span class="checkbox-label">Lembrar-me</span>
+              </label>
+              <a routerLink="/recuperar-senha" class="forgot-link">
+                Esqueci minha senha
+              </a>
+            </div>
+
+            <!-- Botão Login -->
+            <button 
+              type="submit" 
+              [disabled]="loading()"
+              class="login-button">
+              <div class="button-content">
+                <div class="spinner" *ngIf="loading()"></div>
+                <span *ngIf="!loading()">Entrar</span>
+                <span *ngIf="loading()">Entrando...</span>
+                <mat-icon *ngIf="!loading()" class="button-icon">arrow_forward</mat-icon>
+              </div>
+            </button>
+
+          </form>
+
+          <!-- Footer -->
+          <div class="footer">
+            <span>Precisa de acesso?</span>
+            <a routerLink="/suporte" class="support-link">Fale com o suporte</a>
+          </div>
+
+        </div>
+
+        <!-- Elementos decorativos -->
+        <div class="decorative-orb decorative-orb-1"></div>
+        <div class="decorative-orb decorative-orb-2"></div>
+      </div>
+    </div>

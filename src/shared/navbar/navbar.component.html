@@ -1,0 +1,42 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button routerLink="/">
+    <mat-icon aria-hidden="true">home</mat-icon>
+  </button>
+
+  <span style="margin-left: 8px; font-weight: 600;">{{ title }}</span>
+
+  <span class="spacer" style="flex:1 1 auto;"></span>
+
+  <!-- Links principais -->
+  <a mat-button routerLink="/dashboard" routerLinkActive="mat-mdc-button-base--active">Dashboard</a>
+  <a mat-button routerLink="/relatorios" routerLinkActive="mat-mdc-button-base--active">Relatórios</a>
+  <a mat-button routerLink="/config" routerLinkActive="mat-mdc-button-base--active">Config</a>
+  <a mat-button routerLink="/assinaturas" routerLinkActive="mat-mdc-button-base--active">
+    Assinaturas
+  </a>
+
+  <!-- Menu de usuário (perfil + logout) -->
+  <button mat-button [matMenuTriggerFor]="userMenu" aria-label="Menu do usuário" style="margin-left:8px">
+    <mat-icon>account_circle</mat-icon>
+    <span *ngIf="usuario" style="margin-left:6px">{{ usuario }}</span>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item routerLink="/perfil">
+      <mat-icon>person</mat-icon>
+      <span>Perfil</span>
+    </button>
+
+    <button mat-menu-item routerLink="/assinaturas">
+      <mat-icon>workspace_premium</mat-icon>
+      <span>Gerenciar assinaturas</span>
+    </button>
+
+    <mat-divider></mat-divider>
+
+    <button mat-menu-item (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Sair</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>

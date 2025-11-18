@@ -1,0 +1,150 @@
+<section class="page" *ngIf="filtro as f">
+  <header class="topbar">
+    <div class="left">
+      <h1>Gerenciamento de Assinaturas</h1>
+      <div class="chips">
+        <mat-chip-set>
+          <mat-chip>Totais: {{ totais().total }}</mat-chip>
+          <mat-chip>Ativas: {{ totais().ativas }}</mat-chip>
+          <mat-chip>Pendentes: {{ totais().pendentes }}</mat-chip>
+          <mat-chip>Pausadas: {{ totais().pausadas }}</mat-chip>
+          <mat-chip>Canceladas: {{ totais().canceladas }}</mat-chip>
+          <mat-chip>MRR: R$ {{ totais().mrr | number:'1.2-2' }}</mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
+    <div class="right">
+      <button mat-flat-button color="primary" (click)="novaAssinatura()">
+        <mat-icon>add</mat-icon>
+        Nova assinatura
+      </button>
+    </div>
+  </header>
+
+  <div class="filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar</mat-label>
+      <input matInput placeholder="Cliente, e-mail, plano..." [formControl]="qControl">
+      <button *ngIf="f.value.q" matSuffix mat-icon-button aria-label="Limpar busca" (click)="qControl.setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [formControl]="statusControl">
+        <mat-option value="">Todos</mat-option>
+        <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Plano</mat-label>
+      <mat-select [formControl]="planoControl">
+        <mat-option value="">Todos</mat-option>
+        <mat-option *ngFor="let p of planos" [value]="p">{{ p }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-button (click)="limparFiltros()">
+      <mat-icon>filter_alt_off</mat-icon> Limpar
+    </button>
+  </div>
+
+  <div class="table-wrap">
+    <table mat-table [dataSource]="data()" matSort class="mat-elevation-z1" aria-label="Tabela de assinaturas">
+
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let s">{{ s.id }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="cliente">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+        <td mat-cell *matCellDef="let s">
+          <div class="cliente">
+            <div class="nome">{{ s.cliente }}</div>
+            <div class="email">{{ s.email }}</div>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="plano">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Plano</th>
+        <td mat-cell *matCellDef="let s">{{ s.plano }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="valorMensal">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Valor</th>
+        <td mat-cell *matCellDef="let s">R$ {{ s.valorMensal | number:'1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ciclo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Ciclo</th>
+        <td mat-cell *matCellDef="let s">{{ s.ciclo | titlecase }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let s">
+          <span class="pill" [class.ativa]="s.status==='ATIVA'"
+                             [class.pendente]="s.status==='PENDENTE'"
+                             [class.pausada]="s.status==='PAUSADA'"
+                             [class.cancelada]="s.status==='CANCELADA'">
+            {{ s.status }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="inicio">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Início</th>
+        <td mat-cell *matCellDef="let s">{{ s.inicio | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="proxCobranca">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Próx. cobrança</th>
+        <td mat-cell *matCellDef="let s">{{ s.proxCobranca | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="falhas">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Falhas</th>
+        <td mat-cell *matCellDef="let s">
+          <span [matTooltip]="'Tentativas com erro'">{{ s.falhas || 0 }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let s" class="acoes">
+          <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Ações">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="suporte(s)" class="suporte-btn">
+              <mat-icon>support_agent</mat-icon>
+              <span>Suporte</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="ver(s)"><mat-icon>visibility</mat-icon><span>Ver</span></button>
+            <button mat-menu-item (click)="pausarRetomar(s)">
+              <mat-icon>{{ s.status==='PAUSADA' ? 'play_arrow' : 'pause' }}</mat-icon>
+              <span>{{ s.status==='PAUSADA' ? 'Retomar' : 'Pausar' }}</span>
+            </button>
+            <button mat-menu-item (click)="cobrarAgora(s)"><mat-icon>payments</mat-icon><span>Cobrar agora</span></button>
+            <button mat-menu-item (click)="cancelar(s)"><mat-icon>cancel</mat-icon><span>Cancelar</span></button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Estado sem dados -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          Nenhum resultado para "<strong>{{ f.value.q || '—' }}</strong>".
+        </td>
+      </tr>
+    </table>
+  </div>
+</section>

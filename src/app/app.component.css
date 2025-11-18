@@ -1,0 +1,97 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #121212;
+}
+
+.header {
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.app-title {
+  font-weight: 500;
+  font-size: 20px;
+  color: #ffffff;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.logout-btn {
+  color: #bdbdbd;
+  transition: color 0.3s;
+}
+
+.logout-btn:hover {
+  color: #ffffff;
+}
+
+.main-content {
+  flex: 1;
+  background-color: #121212;
+  padding-bottom: 48px; /* Para compensar o footer fixo */
+}
+
+.content-container {
+  min-height: 100%;
+  padding: 20px;
+  color: #e0e0e0;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background-color: #0d0d0d;
+  border-top: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.footer-text {
+  color: #9e9e9e;
+}
+
+/* Para páginas que precisam do espaço completo (como login) */
+.no-header {
+  padding-bottom: 0;
+}
+
+.no-header .content-container {
+  height: 100vh;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #121212;
+}
+
+.user-info {
+  font-weight: 500;
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* styles.css ou component.css */
+.custom-logout {
+  color: #ffffff !important;       /* texto branco */
+  background-color: transparent;
+}
+
+.custom-logout mat-icon {
+  color: #ffffff !important;       /* ícone branco */
+}

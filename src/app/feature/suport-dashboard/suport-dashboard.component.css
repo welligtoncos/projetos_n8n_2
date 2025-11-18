@@ -1,0 +1,36 @@
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.kpi {
+  padding: 16px;
+}
+.kpi-title { font-size: 12px; opacity: .7; }
+.kpi-value { font-size: 24px; font-weight: 700; margin: 6px 0 8px; }
+.kpi-sub { font-size: 12px; opacity: .8; }
+
+.panel { grid-column: span 4; padding: 0; }
+.panel .panel-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.panel table { width: 100%; }
+.panel td { vertical-align: middle; }
+.service-name { display:flex; align-items:center; gap:8px; }
+
+.pill {
+  padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+}
+.pill.ok { background: #e8f5e9; color:#2e7d32; }
+.pill.warn { background: #fff8e1; color:#f9a825; }
+.pill.stop { background: #ffebee; color:#c62828; }
+
+@media (max-width: 1200px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .panel { grid-column: span 2; }
+}
+@media (max-width: 700px) {
+  .grid { grid-template-columns: 1fr; }
+  .panel { grid-column: span 1; }
+}
