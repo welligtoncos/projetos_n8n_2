@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "instanceId": "12345"
+  },
+  "name": "WhatsApp + AI Agent (Gemini)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook/whatsapp",
+        "options": {}
+      },
+      "id": "webhook-whatsapp",
+      "name": "WhatsApp Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [240, 300],
+      "webhookId": "whatsapp-messages"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Processar dados do WAHA (WhatsApp API)\nconst body = $input.first().json;\n\n// Log completo para debug\nconsole.log('Dados recebidos:', JSON.stringify(body, null, 2));\n\nlet message = '';\nlet phone = '';\nlet name = '';\n\n// Formato WAHA\nif (body.event === 'message' && body.payload) {\n  const payload = body.payload;\n  message = payload.body || payload.text || '';\n  phone = payload.from || payload.chatId || '';\n  name = payload.fromMe ? 'Você' : (payload.notifyName || payload.pushName || 'Cliente');\n}\n// Outros formatos\nelse if (body.messages && body.messages[0]) {\n  const msg = body.messages[0];\n  message = msg.body || msg.text || '';\n  phone = msg.from || msg.chatId || '';\n  name = msg.notifyName || msg.pushName || 'Cliente';\n}\n// Formato direto\nelse {\n  message = body.body || body.text || body.message || '';\n  phone = body.from || body.chatId || '';\n  name = body.notifyName || body.pushName || 'Cliente';\n}\n\n// Limpar número\nif (phone) {\n  phone = phone.replace('@c.us', '').replace('@g.us', '').replace(/\\D/g, '');\n}\n\n// Validar dados\nif (!message || message.trim() === '') {\n  throw new Error('Mensagem vazia');\n}\n\nif (!phone || phone === '') {\n  throw new Error('Telefone não encontrado');\n}\n\nreturn [{\n  json: {\n    chatInput: message.trim(),\n    phone: phone,\n    customerName: name || 'Cliente',\n    sessionId: `whatsapp_${phone}`,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "process-whatsapp",
+      "name": "Processar WhatsApp",
+      "type": "n8n-nodes-base.code",
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "agent": {
+          "llm": {
+            "@type": "chatGoogleGenerativeAI",
+            "model": "gemini-2.0-flash-exp",
+            "options": {
+              "apiKey": "={{ $credentials.googleGenerativeAiApi.apiKey }}",
+              "temperature": 0.3,
+              "maxOutputTokens": 500,
+              "topP": 0.8,
+              "topK": 40
+            }
+          },
+          "systemMessage": "Você é um agente de IA especializado em atendimento ao cliente via WhatsApp. Seu nome é Assistant.\n\n## Sua personalidade:\n- Profissional mas amigável e acessível\n- Responde sempre em português brasileiro\n- Usa emojis moderadamente (1-2 por mensagem)\n- Foca em resolver problemas e fornecer soluções práticas\n- Mantém conversas concisas mas completas\n- Se apresenta como \"Assistant, seu agente virtual\"\n\n## Informações da empresa:\n- Nome: TechSolutions\n- Funcionamento: Segunda a sexta, 8h às 18h | Sábado, 8h às 12h\n- Contato: WhatsApp, email contato@techsolutions.com, telefone (11) 99999-9999\n- Localização: Rua Principal, 123 - Centro, São Paulo - SP\n- Especialidades: Desenvolvimento de software, automação, chatbots, IA, n8n\n\n## Como responder:\n1. **Horários** → Informe funcionamento completo\n2. **Serviços** → Foque em automação, IA e desenvolvimento\n3. **Preços** → Colete necessidades e agende conversa comercial\n4. **Localização** → Forneça endereço completo\n5. **Problemas técnicos** → Colete detalhes e ofereça suporte\n6. **Primeira interação** → Se apresente como Assistant\n\n## Regras importantes:\n- Sempre mantenha tom profissional mas humano\n- Para orçamentos, sempre peça para agendar uma conversa\n- Se não souber algo, seja honesto e ofereça alternativas\n- Termine mensagens oferecendo ajuda adicional\n\nResponda à mensagem do cliente de forma útil e direcionada:",
+          "memory": {
+            "@type": "bufferMemory",
+            "maxTokenLimit": 2000,
+            "returnMessages": true
+          }
+        },
+        "options": {}
+      },
+      "id": "ai-agent",
+      "name": "AI Agent (Gemini)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Processar resposta do AI Agent\nconst agentResponse = $input.first().json;\n\n// Extrair a resposta do agente\nlet response = '';\nif (agentResponse.output) {\n  response = agentResponse.output;\n} else if (agentResponse.text) {\n  response = agentResponse.text;\n} else {\n  response = 'Desculpe, ocorreu um erro interno. Tente novamente.';\n}\n\n// Limitar tamanho da resposta para WhatsApp (máximo ~1000 caracteres)\nif (response.length > 1000) {\n  response = response.substring(0, 950) + '\\n\\n...continua. Digite \"continuar\" para ver o resto.';\n}\n\n// Pegar dados do contexto anterior\nconst whatsappData = $('Processar WhatsApp').item.json;\n\nreturn [{\n  json: {\n    response: response.trim(),\n    phone: whatsappData.phone,\n    customerName: whatsappData.customerName,\n    originalMessage: whatsappData.chatInput,\n    sessionId: whatsappData.sessionId,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "process-agent-response",
+      "name": "Processar Resposta Agent",
+      "type": "n8n-nodes-base.code",
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://whatsapp-api:3000/api/sendText",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "session": "default",
+          "chatId": "{{ $json.phone }}@c.us",
+          "text": "{{ $json.response }}"
+        }
+      },
+      "id": "send-whatsapp",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": true,
+          "message": "Mensagem processada pelo AI Agent",
+          "customer": "={{ $json.customerName }}",
+          "timestamp": "={{ $json.timestamp }}"
+        }
+      },
+      "id": "webhook-response",
+      "name": "Resposta Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "WhatsApp Webhook": {
+      "main": [
+        [
+          {
+            "node": "Processar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Gemini)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Gemini)": {
+      "main": [
+        [
+          {
+            "node": "Processar Resposta Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Resposta Agent": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Resposta Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

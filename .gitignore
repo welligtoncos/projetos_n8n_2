@@ -1,0 +1,227 @@
+# ============================================
+# .gitignore - n8n + WhatsApp + Gemini Project
+# ============================================
+
+# ===== DADOS SENSÍVEIS =====
+# API Keys e credenciais
+.env
+.env.local
+.env.*.local
+*.key
+api-keys.txt
+credentials.json
+service-account.json
+
+# ===== DADOS PERSISTENTES =====
+# Dados do n8n (workflows, execuções, credenciais)
+data/n8n/
+data/n8n/*
+/data/n8n/
+
+# Dados do WhatsApp (sessões, QR codes, tokens)
+data/whatsapp/
+data/whatsapp/*
+/data/whatsapp/
+
+# Dados do PostgreSQL
+data/postgres/
+data/postgres/*
+/data/postgres/
+
+# Dados do Redis
+data/redis/
+data/redis/*
+/data/redis/
+
+# Dados do Grafana
+data/grafana/
+data/grafana/*
+/data/grafana/
+
+# Dados do Prometheus
+data/prometheus/
+data/prometheus/*
+/data/prometheus/
+
+# Dados do Ollama (se usado)
+data/ollama/
+data/ollama/*
+/data/ollama/
+
+# ===== LOGS =====
+# Logs de aplicações
+logs/
+logs/*
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs do Docker
+docker-compose.logs
+*.logs
+
+# ===== DOCKER =====
+# Volumes nomeados (caso use)
+volumes/
+docker-data/
+
+# ===== BACKUPS =====
+# Backups automáticos
+backup/
+backups/
+backup-*/
+*.backup
+*.bak
+*.dump
+*.sql
+
+# ===== TEMPORÁRIOS =====
+# Arquivos temporários
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+*~
+
+# ===== SISTEMA OPERACIONAL =====
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.nfs*
+
+# ===== EDITORS/IDEs =====
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains
+.idea/
+*.swp
+*.swo
+
+# Vim
+*.swp
+*.swo
+*.swn
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# ===== NODE.JS (se usar) =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ===== PYTHON (se usar) =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.venv/
+venv/
+ENV/
+
+# ===== CERTIFICADOS SSL =====
+# Certificados e chaves SSL
+*.pem
+*.crt
+*.cert
+*.cer
+*.p12
+*.pfx
+ssl/
+certs/
+nginx/ssl/*
+!nginx/ssl/.gitkeep
+
+# ===== ARQUIVOS DE CONFIGURAÇÃO SENSÍVEIS =====
+# Configurações com dados sensíveis
+config/production.json
+config/local.json
+.config
+settings.json
+
+# ===== ARQUIVOS DE TESTE =====
+# Resultados de testes
+coverage/
+.nyc_output/
+.coverage
+htmlcov/
+
+# ===== ARQUIVOS GRANDES =====
+# Arquivos de mídia grandes
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.iso
+*.dmg
+
+# Arquivos de banco grandes
+*.db-journal
+*.sqlite3-journal
+
+# ===== ARQUIVOS ESPECÍFICOS DO PROJETO =====
+# Scripts de teste pessoais
+test_*.py
+test_*.js
+test_*.sh
+*_test.*
+
+# Arquivos de exemplo com dados reais
+example_*.env
+real_data.*
+
+# Notas pessoais
+TODO.md
+NOTES.md
+PERSONAL.md
+
+# ===== MANTER ESTRUTURA DE PASTAS =====
+# Manter pastas vazias mas não o conteúdo
+data/.gitkeep
+logs/.gitkeep
+backup/.gitkeep
+nginx/ssl/.gitkeep
+
+# ===== COMENTÁRIOS =====
+# Este .gitignore protege:
+# ✅ API keys e credenciais
+# ✅ Dados persistentes (n8n, WhatsApp, DBs)
+# ✅ Logs e arquivos temporários  
+# ✅ Backups e arquivos pessoais
+# ✅ Configurações específicas do ambiente
+# ✅ Sessões do WhatsApp (QR codes, tokens)
+# ✅ Execuções e workflows com dados sensíveis
+
+chatbot-evolution/data/
+chatbot-evolution/data/postgres/
+chatbot-evolution/data/redis/
+chatbot-evolution/data/n8n/
